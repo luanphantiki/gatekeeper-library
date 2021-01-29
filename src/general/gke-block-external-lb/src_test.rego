@@ -1,21 +1,21 @@
 package gkeblockexternallb
 
 test_input_violations {
-    input := { "review": external_lb_output }
+    input := { "request": external_lb_output }
 
     results := violation with input as input
     count(results) == 1
 }
 
 test_input_violations_with_annotations {
-    input := { "review": external_lb_output_with_annotations }
+    input := { "request": external_lb_output_with_annotations }
 
     results := violation with input as input
     count(results) == 1
 }
 
 test_input_with_internal_lb {
-    input := { "review": internal_lb_output }
+    input := { "request": internal_lb_output }
 
     results := violation with input as input
     count(results) == 0
