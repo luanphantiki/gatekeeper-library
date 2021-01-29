@@ -3,9 +3,10 @@ kind: gkeBlockExternalLb
 metadata:
   name: block-external-lb
 spec:
+  enforcementAction: dryrun
   match:
     kinds:
       - apiGroups: [""]
         kinds: ["Service"]
     excludedNamespaces:
-      - "kube-system"
+      - "staging"
