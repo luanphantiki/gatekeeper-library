@@ -1,130 +1,112 @@
 package gkeblockexternallb
-
-test_input_violations_without_annotations {
-    input := { "request":  gke_external_lb}
-
-    results := violation with input as input
-    count(results) == 1
-}
-
-test_input_violations_with_annotations {
-    input := { "request":  gke_external_lb_with_annotations }
+test_input_violations {
+    input := { "request":  external_lb_output }
 
     results := violation with input as input
     count(results) == 1
 }
 
-test_input_non_svc {
-    input := { "request":  non_svc }
+test_input_with_internal_lb {
+    input := { "request": internal_lb_output }
 
     results := violation with input as input
     count(results) == 0
 }
 
-test_input_with_internal_lb{
-    input := { "request": gke_internal_lb }
 
-    results := violation with input as input
-    count(results) == 0
-}
-
-non_svc = output {
-  output = {
-    "kind": {
-        "group": "",
-        "version": "v1",
-        "kind": "Foo",
-    },
-    "object": {
-      "metadata": {
-        "name": "bar",
-      },
-      "spec": {
-          "externalIPs": ["1.1.1.1"],
-      }
-    }
-  }
-}
-
-
-gke_external_lb = output {
+external_lb_output = output {
   output = {
     "kind": {
         "group": "",
         "version": "v1",
         "kind": "Service",
     },
-    "object": {
-      "metadata": {
-        "name": "bar",
-      },
-      "spec": {
-          "selector": "MyApp",
-          "ports": [{
-              "name": "http",
-              "protocol": "TCP",
-              "port": 80,
-              "targetPort": 8080,
-          }],
-          "type": "LoadBalancer",
-      }
-    }
+    "object": external_lb_obj
   }
 }
 
-gke_internal_lb = output {
+internal_lb_output = output {
   output = {
     "kind": {
         "group": "",
         "version": "v1",
         "kind": "Service",
     },
-    "object": {
-      "metadata": {
-        "name": "bar",
+    "object": internal_lb_obj
+  }
+}
+
+
+internal_lb_obj = {
+    "apiVersion": "v1",
+    "kind": "Service",
+    "metadata": {
         "annotations": {
             "cloud.google.com/load-balancer-type": "Internal",
-            "foo": "bar",
-        }
-      },
-      "spec": {
-          "selector": "MyApp",
-          "ports": [{
-              "name": "http",
-              "protocol": "TCP",
-              "port": 80,
-              "targetPort": 8080,
-          }],
-          "type": "LoadBalancer",
-      }
-    }
-  }
+        },
+        "name": "ingress-nginx",
+        "namespace": "ingress-nginx",
+    },
+    "spec": {
+        "externalTrafficPolicy": "Local",
+        "healthCheckNodePort": 31642,
+        "ports": [
+            {
+                "name": "http",
+                "nodePort": 31111,
+                "port": 80,
+                "protocol": "TCP",
+                "targetPort": "http"
+            },
+            {
+                "name": "https",
+                "nodePort": 31389,
+                "port": 443,
+                "protocol": "TCP",
+                "targetPort": "https"
+            }
+        ],
+        "selector": {
+            "app.kubernetes.io/name": "ingress-nginx",
+            "app.kubernetes.io/part-of": "ingress-nginx"
+        },
+        "sessionAffinity": "None",
+        "type": "LoadBalancer"
+    },
 }
 
-gke_external_lb_with_annotations = output {
-  output = {
-    "kind": {
-        "group": "",
-        "version": "v1",
-        "kind": "Service",
+external_lb_obj = {
+    "apiVersion": "v1",
+    "kind": "Service",
+    "metadata": {
+        "name": "ingress-nginx",
+        "namespace": "ingress-nginx",
     },
-    "object": {
-      "metadata": {
-        "name": "bar",
-        "annotations": {
-            "foo": "bar",
-        }
-      },
-      "spec": {
-          "selector": "MyApp",
-          "ports": [{
-              "name": "http",
-              "protocol": "TCP",
-              "port": 80,
-              "targetPort": 8080,
-          }],
-          "type": "LoadBalancer",
-      }
-    }
-  }
+    "spec": {
+        "clusterIP": "10.80.124.252",
+        "externalTrafficPolicy": "Local",
+        "healthCheckNodePort": 31642,
+        "ports": [
+            {
+                "name": "http",
+                "nodePort": 31111,
+                "port": 80,
+                "protocol": "TCP",
+                "targetPort": "http"
+            },
+            {
+                "name": "https",
+                "nodePort": 31389,
+                "port": 443,
+                "protocol": "TCP",
+                "targetPort": "https"
+            }
+        ],
+        "selector": {
+            "app.kubernetes.io/name": "ingress-nginx",
+            "app.kubernetes.io/part-of": "ingress-nginx"
+        },
+        "sessionAffinity": "None",
+        "type": "LoadBalancer"
+    },
 }
