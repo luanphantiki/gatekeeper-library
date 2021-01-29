@@ -8,5 +8,5 @@ spec:
     kinds:
       - apiGroups: [""]
         kinds: ["Service"]
-    excludedNamespaces:
+    namespaces:
       - "staging"
