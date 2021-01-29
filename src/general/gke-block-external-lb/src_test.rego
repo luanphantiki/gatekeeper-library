@@ -1,13 +1,21 @@
 package gkeblockexternallb
+
 test_input_violations {
-    input := { "request":  external_lb_output }
+    input := { "review": external_lb_output }
+
+    results := violation with input as input
+    count(results) == 1
+}
+
+test_input_violations_with_annotations {
+    input := { "review": external_lb_output_with_annotations }
 
     results := violation with input as input
     count(results) == 1
 }
 
 test_input_with_internal_lb {
-    input := { "request": internal_lb_output }
+    input := { "review": internal_lb_output }
 
     results := violation with input as input
     count(results) == 0
@@ -22,6 +30,17 @@ external_lb_output = output {
         "kind": "Service",
     },
     "object": external_lb_obj
+  }
+}
+
+external_lb_output_with_annotations = output {
+  output = {
+    "kind": {
+        "group": "",
+        "version": "v1",
+        "kind": "Service",
+    },
+    "object": external_lb_obj_with_annotations
   }
 }
 
@@ -83,7 +102,45 @@ external_lb_obj = {
         "namespace": "ingress-nginx",
     },
     "spec": {
-        "clusterIP": "10.80.124.252",
+        "externalTrafficPolicy": "Local",
+        "healthCheckNodePort": 31642,
+        "ports": [
+            {
+                "name": "http",
+                "nodePort": 31111,
+                "port": 80,
+                "protocol": "TCP",
+                "targetPort": "http"
+            },
+            {
+                "name": "https",
+                "nodePort": 31389,
+                "port": 443,
+                "protocol": "TCP",
+                "targetPort": "https"
+            }
+        ],
+        "selector": {
+            "app.kubernetes.io/name": "ingress-nginx",
+            "app.kubernetes.io/part-of": "ingress-nginx"
+        },
+        "sessionAffinity": "None",
+        "type": "LoadBalancer"
+    },
+}
+
+
+external_lb_obj_with_annotations = {
+    "apiVersion": "v1",
+    "kind": "Service",
+    "metadata": {
+        "name": "ingress-nginx",
+        "namespace": "ingress-nginx",
+        "annotations": {
+            "cloud.google.com/load-balancer-type": "something",
+        },
+    },
+    "spec": {
         "externalTrafficPolicy": "Local",
         "healthCheckNodePort": 31642,
         "ports": [
