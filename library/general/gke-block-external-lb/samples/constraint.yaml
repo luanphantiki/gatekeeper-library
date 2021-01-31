@@ -3,7 +3,7 @@ kind: gkeBlockExternalLb
 metadata:
   name: block-external-lb
 spec:
-  enforcementAction: dryrun
+  # enforcementAction: dryrun
   match:
     kinds:
       - apiGroups: [""]

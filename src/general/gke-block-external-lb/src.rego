@@ -1,8 +1,8 @@
 package gkeblockexternallb
 
 violation[{"msg": msg}] {
-    input.request.object.kind == "Service"
-    service := input.request.object
+    input.review.object.kind == "Service"
+    service := input.review.object
     service.spec.type == "LoadBalancer"
     not service.metadata.annotations["cloud.google.com/load-balancer-type"] == "Internal"
 
